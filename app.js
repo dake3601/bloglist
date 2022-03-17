@@ -1,8 +1,8 @@
-const config = require('./utils/config')
 const express = require('express')
 const app = express()
 const cors = require('cors')
 const mongoose = require('mongoose')
+const config = require('./utils/config')
 const blogSchema = require('./controllers/blogs')
 
 console.log('connecting to', config.MONGODB_URI)
