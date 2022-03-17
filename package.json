@@ -11,6 +11,7 @@
   "author": "Keven Arroyo",
   "license": "MIT",
   "devDependencies": {
+    "eslint": "^8.11.0",
     "nodemon": "^2.0.15"
   },
   "dependencies": {
