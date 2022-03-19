@@ -34,6 +34,37 @@ test('all blogs have id property', async () => {
   response.body.forEach(blog => expect(blog.id).toBeDefined())
 })
 
+test('a valid blog can be added ', async () => {
+  const newBlog = {
+    title: 'Canonical string reduction',
+    author: 'Edsger W. Dijkstra',
+    url: 'http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html',
+    likes: 12,
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  const blogsAtEnd = await helper.blogsInDb()
+  expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length + 1)
+
+  const titles = blogsAtEnd.map(b => b.title)
+  expect(titles).toContain(
+    'Canonical string reduction'
+  )
+  const authors = blogsAtEnd.map(b => b.author)
+  expect(authors).toContain(
+    'Edsger W. Dijkstra'
+  )
+  const urls = blogsAtEnd.map(b => b.url)
+  expect(urls).toContain(
+    'http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html'
+  )
+})
+
 afterAll(() => {
   mongoose.connection.close()
 })
