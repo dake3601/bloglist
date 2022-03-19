@@ -79,12 +79,30 @@ test('likes missing defaults to 0', async () => {
     .expect('Content-Type', /application\/json/)
 
   const blogsAtEnd = await helper.blogsInDb()
+  expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length + 1)
+
   const newBlogAtEnd = blogsAtEnd.find(b =>
     b.title === newBlog.title &&
     b.author === newBlog.author &&
     b.url === newBlog.url
   )
   expect(newBlogAtEnd.likes).toEqual(0)
+})
+
+test('blog without title and url is not added', async () => {
+  const newBlog = {
+    author: 'Robert C. Martin',
+    likes: 10,
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(400)
+
+  const blogsAtEnd = await helper.blogsInDb()
+
+  expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
 })
 
 afterAll(() => {
