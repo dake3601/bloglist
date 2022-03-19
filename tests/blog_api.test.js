@@ -34,7 +34,7 @@ test('all blogs have id property', async () => {
   response.body.forEach(blog => expect(blog.id).toBeDefined())
 })
 
-test('a valid blog can be added ', async () => {
+test('a valid blog can be added', async () => {
   const newBlog = {
     title: 'Canonical string reduction',
     author: 'Edsger W. Dijkstra',
@@ -63,6 +63,28 @@ test('a valid blog can be added ', async () => {
   expect(urls).toContain(
     'http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html'
   )
+})
+
+test('likes missing defaults to 0', async () => {
+  const newBlog = {
+    title: 'First class tests',
+    author: 'Robert C. Martin',
+    url: 'http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll',
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  const blogsAtEnd = await helper.blogsInDb()
+  const newBlogAtEnd = blogsAtEnd.find(b =>
+    b.title === newBlog.title &&
+    b.author === newBlog.author &&
+    b.url === newBlog.url
+  )
+  expect(newBlogAtEnd.likes).toEqual(0)
 })
 
 afterAll(() => {
