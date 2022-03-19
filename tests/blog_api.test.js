@@ -34,6 +34,19 @@ describe('when there is initially some blogs saved', () => {
 
     response.body.forEach(blog => expect(blog.id).toBeDefined())
   })
+
+  test('a specific blog is within the returned blogs', async () => {
+    const response = await api.get('/api/blogs')
+
+    const blogsWithoutId = response.body.map(helper.removeId)
+
+    expect(blogsWithoutId).toContainEqual({
+      title: 'React patterns',
+      author: 'Michael Chan',
+      url: 'https://reactpatterns.com/',
+      likes: 7,
+    })
+  })
 })
 
 describe('addition of a new blog', () => {
@@ -54,18 +67,8 @@ describe('addition of a new blog', () => {
     const blogsAtEnd = await helper.blogsInDb()
     expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length + 1)
 
-    const titles = blogsAtEnd.map(b => b.title)
-    expect(titles).toContain(
-      'Canonical string reduction'
-    )
-    const authors = blogsAtEnd.map(b => b.author)
-    expect(authors).toContain(
-      'Edsger W. Dijkstra'
-    )
-    const urls = blogsAtEnd.map(b => b.url)
-    expect(urls).toContain(
-      'http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html'
-    )
+    const blogsWithoutId = blogsAtEnd.map(helper.removeId)
+    expect(blogsWithoutId).toContainEqual(newBlog)
   })
 
   test('likes missing defaults to 0', async () => {
@@ -84,12 +87,9 @@ describe('addition of a new blog', () => {
     const blogsAtEnd = await helper.blogsInDb()
     expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length + 1)
 
-    const newBlogAtEnd = blogsAtEnd.find(b =>
-      b.title === newBlog.title &&
-      b.author === newBlog.author &&
-      b.url === newBlog.url
-    )
-    expect(newBlogAtEnd.likes).toEqual(0)
+    newBlog.likes = 0
+    const blogsWithoutId = blogsAtEnd.map(helper.removeId)
+    expect(blogsWithoutId).toContainEqual(newBlog)
   })
 
   test('blog without title and url is not added', async () => {
@@ -122,12 +122,9 @@ describe('deletion of a blog', () => {
 
     expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length - 1)
 
-    const titles = blogsAtEnd.map(b => b.title)
-    expect(titles).not.toContain(blogToDelete.title)
-    const authors = blogsAtEnd.map(b => b.author)
-    expect(authors).not.toContain(blogToDelete.author)
-    const urls = blogsAtEnd.map(b => b.url)
-    expect(urls).not.toContain(blogToDelete.url)
+    const blogsWithoutId = blogsAtEnd.map(helper.removeId)
+
+    expect(blogsWithoutId).not.toContainEqual(blogToDelete)
   })
 })
 
@@ -149,14 +146,9 @@ describe('updating a blog', () => {
       .expect(200)
 
     const blogsAtEnd = await helper.blogsInDb()
-    const updatedBlogAtEnd = blogsAtEnd.find(b =>
-      b.id === blogToUpdate.id
-    )
 
-    expect(updatedBlogAtEnd.likes).toEqual(updatedBlog.likes)
-    expect(updatedBlogAtEnd.title).toEqual(updatedBlog.title)
-    expect(updatedBlogAtEnd.author).toEqual(updatedBlog.author)
-    expect(updatedBlogAtEnd.url).toEqual(updatedBlog.url)
+    updatedBlog.id = blogToUpdate.id
+    expect(blogsAtEnd).toContainEqual(updatedBlog)
   })
 })
 

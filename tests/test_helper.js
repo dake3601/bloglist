@@ -101,10 +101,18 @@ const blogsInDb = async () => {
   return blogs.map(blog => blog.toJSON())
 }
 
+const removeId = b => ({
+  title: b.title,
+  author: b.author,
+  url: b.url,
+  likes: b.likes,
+})
+
 module.exports = {
   listWithOneBlog,
   listWithBlogs,
   twoFavorites,
   initialBlogs,
-  blogsInDb
+  blogsInDb,
+  removeId
 }
