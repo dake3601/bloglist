@@ -105,6 +105,26 @@ test('blog without title and url is not added', async () => {
   expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
 })
 
+test('deleting a blog with id', async () => {
+  const blogsAtStart = await helper.blogsInDb()
+  const blogToDelete = blogsAtStart[0]
+
+  await api
+    .delete(`/api/blogs/${blogToDelete.id}`)
+    .expect(204)
+
+  const blogsAtEnd = await helper.blogsInDb()
+
+  expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length - 1)
+
+  const titles = blogsAtEnd.map(b => b.title)
+  expect(titles).not.toContain(blogToDelete.title)
+  const authors = blogsAtEnd.map(b => b.author)
+  expect(authors).not.toContain(blogToDelete.author)
+  const urls = blogsAtEnd.map(b => b.url)
+  expect(urls).not.toContain(blogToDelete.url)
+})
+
 afterAll(() => {
   mongoose.connection.close()
 })
