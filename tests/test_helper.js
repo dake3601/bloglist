@@ -1,3 +1,4 @@
+const User = require('../models/user')
 const Blog = require('../models/blog')
 
 const initialBlogs = [
@@ -108,11 +109,17 @@ const removeId = b => ({
   likes: b.likes,
 })
 
+const usersInDb = async () => {
+  const users = await User.find({})
+  return users.map(blog => blog.toJSON())
+}
+
 module.exports = {
   listWithOneBlog,
   listWithBlogs,
   twoFavorites,
   initialBlogs,
   blogsInDb,
-  removeId
+  removeId,
+  usersInDb
 }
