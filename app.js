@@ -6,6 +6,7 @@ const mongoose = require('mongoose')
 const config = require('./utils/config')
 const blogSchema = require('./controllers/blogs')
 const usersRouter = require('./controllers/users')
+const loginRouter = require('./controllers/login')
 const middleware = require('./utils/middleware')
 
 console.log('connecting to', config.MONGODB_URI)
@@ -21,6 +22,7 @@ mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true })
 app.use(cors())
 app.use(express.json())
 
+app.use('/api/login', loginRouter)
 app.use('/api/blogs', blogSchema)
 app.use('/api/users', usersRouter)
 
