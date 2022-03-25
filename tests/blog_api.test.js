@@ -39,8 +39,6 @@ describe('when there is initially some blogs saved and a user', () => {
         ...blog,
         user: savedUser._id
       }))
-    console.log('initial blogs')
-    console.log(initialBlogs)
     await Blog.deleteMany({})
     await Blog.insertMany(initialBlogs)
   })
@@ -142,7 +140,6 @@ describe('when there is initially some blogs saved and a user', () => {
 
   describe('deletion of a blog', () => {
     test('deleting a blog with id', async () => {
-      console.log(token)
       const blogsAtStart = await helper.blogsInDb()
       const blogToDelete = blogsAtStart[0]
 
