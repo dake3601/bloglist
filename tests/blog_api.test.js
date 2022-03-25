@@ -1,5 +1,6 @@
 const supertest = require('supertest')
 const mongoose = require('mongoose')
+const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const helper = require('./test_helper')
 const app = require('../app')
@@ -7,32 +8,31 @@ const api = supertest(app)
 
 const User = require('../models/user')
 const Blog = require('../models/blog')
-const request = require('superagent')
-const blog = require('../models/blog')
 
 describe('when there is initially some blogs saved and a user', () => {
   let token = ''
   beforeEach(async () => {
     await User.deleteMany({})
 
-    const username = 'Test'
-    const name = 'First Last'
-    const password = 'test'
-    const saltRounds = 10
-    const passwordHash = await bcrypt.hash('test', saltRounds)
-
+    const passwordHash = await bcrypt.hash('passwd', 10)
     const user = new User({
-      username,
-      name,
-      passwordHash,
+      username: 'root',
+      name: 'Superuser',
+      passwordHash
     })
 
     const savedUser = await user.save()
 
-    const response = await api
-      .post('/api/login')
-      .send({ username, password })
-    token = response.body.token
+    const userForToken = {
+      username: savedUser.username,
+      id: savedUser._id,
+    }
+
+    token = jwt.sign(
+      userForToken,
+      process.env.SECRET,
+      { expiresIn: 60*60 }
+    )
 
     const initialBlogs = helper.initialBlogs.map(blog =>
       ({
@@ -136,6 +136,28 @@ describe('when there is initially some blogs saved and a user', () => {
 
       expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
     })
+
+    test('a valid blog without a token', async () => {
+      const emptyToken = ''
+      const newBlog = {
+        title: 'Canonical string reduction',
+        author: 'Edsger W. Dijkstra',
+        url: 'http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html',
+        likes: 12,
+      }
+
+      const result = await api
+        .post('/api/blogs')
+        .set('Authorization', 'bearer ' + emptyToken)
+        .send(newBlog)
+        .expect(401)
+        .expect('Content-Type', /application\/json/)
+
+      expect(result.body.error).toContain('invalid token')
+
+      const blogsAtEnd = await helper.blogsInDb()
+      expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
+    })
   })
 
   describe('deletion of a blog', () => {
@@ -193,7 +215,8 @@ describe('when there is initially one user at db', () => {
     const user = new User({
       username: 'root',
       name: 'Superuser',
-      passwordHash })
+      passwordHash
+    })
 
     await user.save()
   })
