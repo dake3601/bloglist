@@ -25,20 +25,15 @@ describe('when there is initially some blogs saved and a user', () => {
 
     const userForToken = {
       username: savedUser.username,
-      id: savedUser._id,
+      id: savedUser._id
     }
 
-    token = jwt.sign(
-      userForToken,
-      process.env.SECRET,
-      { expiresIn: 60*60 }
-    )
+    token = jwt.sign(userForToken, process.env.SECRET, { expiresIn: 60 * 60 })
 
-    const initialBlogs = helper.initialBlogs.map(blog =>
-      ({
-        ...blog,
-        user: savedUser._id
-      }))
+    const initialBlogs = helper.initialBlogs.map((blog) => ({
+      ...blog,
+      user: savedUser._id
+    }))
     await Blog.deleteMany({})
     await Blog.insertMany(initialBlogs)
   })
@@ -59,7 +54,7 @@ describe('when there is initially some blogs saved and a user', () => {
   test('all blogs have id property', async () => {
     const response = await api.get('/api/blogs')
 
-    response.body.forEach(blog => expect(blog.id).toBeDefined())
+    response.body.forEach((blog) => expect(blog.id).toBeDefined())
   })
 
   test('a specific blog is within the returned blogs', async () => {
@@ -71,7 +66,7 @@ describe('when there is initially some blogs saved and a user', () => {
       title: 'React patterns',
       author: 'Michael Chan',
       url: 'https://reactpatterns.com/',
-      likes: 7,
+      likes: 7
     })
   })
 
@@ -81,7 +76,7 @@ describe('when there is initially some blogs saved and a user', () => {
         title: 'Canonical string reduction',
         author: 'Edsger W. Dijkstra',
         url: 'http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html',
-        likes: 12,
+        likes: 12
       }
 
       await api
@@ -102,7 +97,7 @@ describe('when there is initially some blogs saved and a user', () => {
       const newBlog = {
         title: 'First class tests',
         author: 'Robert C. Martin',
-        url: 'http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll',
+        url: 'http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll'
       }
 
       await api
@@ -123,7 +118,7 @@ describe('when there is initially some blogs saved and a user', () => {
     test('blog without title and url is not added', async () => {
       const newBlog = {
         author: 'Robert C. Martin',
-        likes: 10,
+        likes: 10
       }
 
       await api
@@ -143,7 +138,7 @@ describe('when there is initially some blogs saved and a user', () => {
         title: 'Canonical string reduction',
         author: 'Edsger W. Dijkstra',
         url: 'http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html',
-        likes: 12,
+        likes: 12
       }
 
       const result = await api
@@ -190,7 +185,8 @@ describe('when there is initially some blogs saved and a user', () => {
         author: blogToUpdate.author,
         url: blogToUpdate.url,
         likes: 100,
-        user: blogToUpdate.user
+        user: blogToUpdate.user,
+        comments: []
       }
 
       await api
@@ -227,7 +223,7 @@ describe('when there is initially one user at db', () => {
     const newUser = {
       username: 'Test',
       name: 'First Last',
-      password: 'password',
+      password: 'password'
     }
 
     await api
@@ -239,7 +235,7 @@ describe('when there is initially one user at db', () => {
     const usersAtEnd = await helper.usersInDb()
     expect(usersAtEnd).toHaveLength(usersAtStart.length + 1)
 
-    const usernames = usersAtEnd.map(u => u.username)
+    const usernames = usersAtEnd.map((u) => u.username)
     expect(usernames).toContain(newUser.username)
   })
 
@@ -249,7 +245,7 @@ describe('when there is initially one user at db', () => {
     const newUser = {
       username: 'root',
       name: 'Superuser',
-      password: 'password',
+      password: 'password'
     }
 
     const result = await api
@@ -270,7 +266,7 @@ describe('when there is initially one user at db', () => {
     const newUser = {
       username: 'AI',
       name: 'Artificial intelligence',
-      password: 'password',
+      password: 'password'
     }
 
     const result = await api
@@ -279,7 +275,9 @@ describe('when there is initially one user at db', () => {
       .expect(400)
       .expect('Content-Type', /application\/json/)
 
-    expect(result.body.error).toContain('username must be at least 3 characters long')
+    expect(result.body.error).toContain(
+      'username must be at least 3 characters long'
+    )
 
     const usersAtEnd = await helper.usersInDb()
     expect(usersAtEnd).toHaveLength(usersAtStart.length)
@@ -291,7 +289,7 @@ describe('when there is initially one user at db', () => {
     const newUser = {
       username: 'Test',
       name: 'First Last',
-      password: '12',
+      password: '12'
     }
 
     const result = await api
@@ -300,7 +298,9 @@ describe('when there is initially one user at db', () => {
       .expect(400)
       .expect('Content-Type', /application\/json/)
 
-    expect(result.body.error).toContain('password must be at least 3 characters long')
+    expect(result.body.error).toContain(
+      'password must be at least 3 characters long'
+    )
 
     const usersAtEnd = await helper.usersInDb()
     expect(usersAtEnd).toHaveLength(usersAtStart.length)
